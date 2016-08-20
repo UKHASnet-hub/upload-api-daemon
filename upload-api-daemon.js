@@ -29,6 +29,10 @@ app.post('/upload', function(req, res) {
     if(req.body.rssi) {
         rssi = req.body.rssi
     }
+    var time=Date.UTC();
+    if(req.body.time) {
+        time = Date.UTC(req.body.time)
+    }
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
             res.send(500,{'error':1,'message':'Database Connection Error'})
@@ -50,17 +54,17 @@ app.post('/upload', function(req, res) {
                         console.log('DB Query Error: ', err)
                         return
                     }
-                    upload_packet(res,client,done,req.body.origin,req.body.data,rssi,result.rows[0].id)
+                    upload_packet(res,client,done,req.body.origin,req.body.data,rssi,time,result.rows[0].id)
                 })
             } else {
-                upload_packet(res,client,done,req.body.origin,req.body.data,rssi,result.rows[0].id)
+                upload_packet(res,client,done,req.body.origin,req.body.data,rssi,time,result.rows[0].id)
             }
         })
     })
 })
 
-function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,origin_id) {
-    client.query('INSERT INTO ukhasnet.upload(nodeid,packet,rssi) VALUES($1,$2,$3) RETURNING id;', [origin_id,upload_data,upload_rssi], function(err, result) {
+function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,upload_time,origin_id) {
+    client.query('INSERT INTO ukhasnet.upload(nodeid,packet,rssi,time) VALUES($1,$2,$3,$4) RETURNING id;', [origin_id,upload_data,upload_rssi,upload_time], function(err, result) {
         if(err) {
             done()
             res.send(500,{'error':1,'message':'Database Query Error'})
