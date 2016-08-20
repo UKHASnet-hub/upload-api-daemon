@@ -29,9 +29,9 @@ app.post('/upload', function(req, res) {
     if(req.body.rssi) {
         rssi = req.body.rssi
     }
-    var time=Date.UTC();
+    var time = new Date();
     if(req.body.time) {
-        time = Date.UTC(req.body.time)
+        time = new Date(req.body.time)
     }
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
@@ -64,7 +64,7 @@ app.post('/upload', function(req, res) {
 })
 
 function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,upload_time,origin_id) {
-    client.query('INSERT INTO ukhasnet.upload(nodeid,packet,rssi,time) VALUES($1,$2,$3,$4) RETURNING id;', [origin_id,upload_data,upload_rssi,upload_time], function(err, result) {
+    client.query('INSERT INTO ukhasnet.upload(nodeid,packet,rssi,time) VALUES($1,$2,$3,$4) RETURNING id;', [origin_id,upload_data,upload_rssi,upload_time.toISOString()], function(err, result) {
         if(err) {
             done()
             res.send(500,{'error':1,'message':'Database Query Error'})
