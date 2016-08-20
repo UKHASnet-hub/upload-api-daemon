@@ -94,7 +94,7 @@ function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,ori
                 done()
             })
             res.type('application/json');
-            res.send({'error':0})
+            res.send(201, {'error':0, 'uploadid':result.rows[0].uploadid})
         })
     })
 }
