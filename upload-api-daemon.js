@@ -18,11 +18,11 @@ app.use(bodyParser())
 app.post('/upload', function(req, res) {
     var since_time;
     if(!req.body.origin) {
-        res.send(400,'No Origin Callsign (gateway) specified.')
+        res.send(400,{'error':1,'message':'No Origin Callsign (gateway) specified.'})
         return
     }
     if(!req.body.data) {
-        res.send(400,'No Data given.')
+        res.send(400,{'error':1,'message':'No Data given.'})
         return
     }
     var rssi=0;
@@ -31,14 +31,14 @@ app.post('/upload', function(req, res) {
     }
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
-            res.send(500,'Database Connection Error')
+            res.send(500,{'error':1,'message':'Database Connection Error'})
             console.log('DB Connection Error: ', err)
             return
         }
         client.query('SELECT id FROM ukhasnet.nodes WHERE name = $1;', [req.body.origin], function(err, result) {
             if(err) {
                 done()
-                res.send(500,'Database Query Error')
+                res.send(500,{'error':1,'message':'Database Query Error'})
                 console.log('DB Query Error: ', err)
                 return
             }
@@ -46,7 +46,7 @@ app.post('/upload', function(req, res) {
                 client.query('INSERT INTO ukhasnet.nodes (name) VALUES ($1) RETURNING id;', [req.body.origin], function(err, result) {
                     if(err) {
                         done()
-                        res.send(500,'Database Query Error')
+                        res.send(500,{'error':1,'message':'Database Query Error'})
                         console.log('DB Query Error: ', err)
                         return
                     }
@@ -63,14 +63,14 @@ function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,ori
     client.query('INSERT INTO ukhasnet.upload(nodeid,packet,rssi) VALUES($1,$2,$3) RETURNING id;', [origin_id,upload_data,upload_rssi], function(err, result) {
         if(err) {
             done()
-            res.send(500,'Database Query Error')
+            res.send(500,{'error':1,'message':'Database Query Error'})
             console.log('DB Query Error: ', err)
             return
         }
         client.query('SELECT upload.id AS uploadid,upload.nodeid as nodeid,nodes.name as nodename,upload.time as time,upload.packet as packet,upload.state as state, upload.rssi FROM ukhasnet.upload INNER JOIN ukhasnet.nodes ON upload.nodeid=nodes.id WHERE upload.id=$1;', [result.rows[0].id], function(err, result) {
             if(err) {
                 done()
-                res.send(500,'Database Query Error')
+                res.send(500,{'error':1,'message':'Database Query Error'})
                 console.log('DB Query Error: ', err)
                 return
             }
@@ -86,7 +86,7 @@ function upload_packet(res,client,done,upload_origin,upload_data,upload_rssi,ori
             var uploadNotify = client.query('SELECT pg_notify( \'upload_row\', $1 )',[notify_payload]);
             uploadNotify.on('error', function(err) {
                 done()
-                res.send(500,'Database Query Error')
+                res.send(500,{'error':1,'message':'Database Query Error'})
                 console.log('DB Query Error: ', err)
                 return
             })
