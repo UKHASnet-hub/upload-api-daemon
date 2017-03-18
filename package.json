@@ -5,11 +5,11 @@
   "contributors": [
     {
       "name": "Phil Crump",
-      "email": "phildcrump@gmail.com"
+      "email": "phil@philcrump.co.uk"
     }
   ],
   "scripts": {
-    "start": "node ./upload-api-daemon.js"
+    "start": "./upload-api-daemon.js"
   },
   "repository": {
     "type": "git",
@@ -22,9 +22,9 @@
   },
   "homepage": "https://github.com/UKHASnet-hub/upload-api-daemon",
   "dependencies": {
-    "body-parser": "^1.13.3",
-    "express": "^4.13.3",
-    "pg": "^4.4.1"
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "pg": "^4.5.6"
   },
   "engines": {
     "node": ">=0.10"
