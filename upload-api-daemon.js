@@ -9,10 +9,52 @@ var port = 3002
 var pg = require('pg')
 var pgConfig = require('./config.json')
 
+var net = require('net');
+var sockets = [];
+var tcp_port = 3020;
+
+console.log('TCP: Setting up Server..')
+
+var tcp_server = net.createServer(function(socket) {
+	sockets.push(socket);
+
+	// When client leaves
+	socket.on('end', function() {
+		// Remove client from socket array
+		sockets.splice(sockets.indexOf(socket), 1);
+	});
+
+	// When socket gets errors
+	socket.on('error', function(error) {
+		console.log('Socket Error: ', error.message);
+	});
+});
+
+function tcp_broadcast(message)
+{
+	// If there are no sockets, then don't broadcast any messages
+	if (sockets.length === 0) {
+		return;
+	}
+
+	sockets.forEach(function(socket, index, array){
+		socket.write(message+'\n');
+	});
+};
+
+tcp_server.on('error', function(error)
+{
+	console.log("Error: ", error.message);
+});
+
+tcp_server.listen(tcp_port, function()
+{
+	console.log("Server listening on:" + tcp_port);
+});
+
+console.log('HTTP: Setting up Server..')
+
 app.disable('x-powered-by');
-
-console.log('HTTP: Setting up Functions..')
-
 app.use(bodyParser())
 
 // /upload - POST
@@ -41,6 +83,7 @@ app.post('/upload', function(req, res) {
     if(req.body.time) {
         time = new Date(req.body.time)
     }
+    tcp_broadcast(JSON.stringify({'t':time.toISOString(),'nn':req.body.origin,'p':req.body.data,'r':rssi}));
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
             res.send(500,{'error':1,'message':'Database Connection Error'})
