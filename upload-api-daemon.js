@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var express = require('express')
 var app = express()
 var bodyParser = require('body-parser')
@@ -17,12 +19,18 @@ app.use(bodyParser())
 // Uploads a packet into the database. NOTE: Does not parse it
 app.post('/upload', function(req, res) {
     var since_time;
+    
     if(!req.body.origin) {
         res.send(400,{'error':1,'message':'No Origin Callsign (gateway) specified.'})
         return
     }
     if(!req.body.data) {
         res.send(400,{'error':1,'message':'No Data given.'})
+        return
+    }
+    if(req.body.data.length > 64)
+    {
+        res.send(400,{'error':1,'message':'Message too long (>64 characters)'})
         return
     }
     var rssi=0;
