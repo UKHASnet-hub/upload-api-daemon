@@ -77,12 +77,15 @@ app.post('/upload', function(req, res) {
     }
     var rssi=0;
     if(req.body.rssi) {
-        rssi = req.body.rssi
+        rssi = parseInt(req.body.rssi)
     }
     var time = new Date();
     if(req.body.time) {
         time = new Date(req.body.time)
+    } else if(req.body.age) {
+        time = new Date(time - parseInt(age))
     }
+
     tcp_broadcast(JSON.stringify({'t':time.toISOString(),'nn':req.body.origin,'p':req.body.data,'r':rssi}));
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
