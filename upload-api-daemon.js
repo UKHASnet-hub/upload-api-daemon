@@ -83,7 +83,7 @@ app.post('/upload', function(req, res) {
     if(req.body.time) {
         time = new Date(req.body.time)
     } else if(req.body.age) {
-        time = new Date(time - parseInt(age))
+        time = new Date(time - parseInt(req.body.age))
     }
 
     tcp_broadcast(JSON.stringify({'t':time.toISOString(),'nn':req.body.origin,'p':req.body.data,'r':rssi}));
