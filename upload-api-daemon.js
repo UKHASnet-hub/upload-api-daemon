@@ -80,13 +80,16 @@ app.post('/upload', function(req, res) {
         rssi = parseInt(req.body.rssi)
     }
     var time = new Date();
+    var age = 0;
     if(req.body.time) {
         time = new Date(req.body.time)
     } else if(req.body.age) {
-        time = new Date(time - parseInt(req.body.age))
+        age = parseInt(req.body.age)
+        time = new Date(time - age)
     }
 
-    tcp_broadcast(JSON.stringify({'t':time.toISOString(),'nn':req.body.origin,'p':req.body.data,'r':rssi}));
+    tcp_broadcast(JSON.stringify({'t':time.toISOString(),'nn':req.body.origin,'p':req.body.data,'r':rssi, 'a':age}));
+    
     pg.connect(pgConfig, function(err, client, done) {
         if(err) {
             res.send(500,{'error':1,'message':'Database Connection Error'})
